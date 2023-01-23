@@ -18,7 +18,6 @@ namespace Mod
                     {
                         //TRUCK BODY
                         Instance.GetComponent<SpriteRenderer>().sprite=ModAPI.LoadSprite("truckBodyCol.png");
-                        GameObject.Destroy(Instance.GetComponent<BoxCollider2D>());
                         Instance.gameObject.FixColliders();
                         Instance.GetComponent<SpriteRenderer>().sprite = ModAPI.LoadSprite("truckBody.png");
                         Instance.GetComponent<SpriteRenderer>().sortingOrder=0;
@@ -59,7 +58,6 @@ namespace Mod
 
                         GameObject grinder1 = GameObject.Instantiate(w, back.transform.position + new Vector3(-0.7f*direction, -0.7f, 0f), Quaternion.identity);
                         grinder1.transform.localScale*=1.6f;
-                        GameObject.Destroy(grinder1.GetComponent<SpriteRenderer>());
                         grinder1.GetComponent<Rigidbody2D>().mass=0f;
                         grinder1.GetComponent<PhysicalBehaviour>().Selectable=false;
                         WheelJoint2D grinderJoint = grinder1.AddComponent<WheelJoint2D>();
@@ -74,10 +72,10 @@ namespace Mod
                         grinderMotor.maxMotorTorque=250;
                         grinderJoint.motor = grinderMotor;
                         grinderJoint.useMotor=true;
+                        GameObject.Destroy(grinder1.GetComponent<SpriteRenderer>());
 
                         GameObject grinder2 = GameObject.Instantiate(w, back.transform.position + new Vector3(-0.16f*direction, 0.8f, 0f), Quaternion.identity);
                         grinder2.transform.localScale*=1.4f;
-                        GameObject.Destroy(grinder2.GetComponent<SpriteRenderer>());
                         grinder2.GetComponent<Rigidbody2D>().mass=0f;
                         grinder2.GetComponent<PhysicalBehaviour>().Selectable = false;
                         WheelJoint2D grinder2Joint = grinder2.AddComponent<WheelJoint2D>();
@@ -92,6 +90,7 @@ namespace Mod
                         grinder2Motor.maxMotorTorque=250;
                         grinder2Joint.motor = grinder2Motor;
                         grinder2Joint.useMotor = true;
+                        GameObject.Destroy(grinder2.GetComponent<SpriteRenderer>());
 
                         foreach (Collider2D c in Instance.GetComponents<Collider2D>())
                         {
@@ -136,9 +135,13 @@ namespace Mod
                         }
 
                         //SMOKE
-                        ParticleMachineBehaviour smoke = GameObject.Instantiate(ModAPI.FindSpawnable("Particle Projector").Prefab, Instance.transform.position + new Vector3(4f*direction, 2f, 0f), Quaternion.identity).GetComponent<ParticleMachineBehaviour>();
-                        GameObject.Destroy(smoke.GetComponent<Rigidbody2D>());
-                        GameObject.Destroy(smoke.GetComponent<SpriteRenderer>());
+                        JointAngleLimits2D jointZero = new JointAngleLimits2D();
+                        jointZero.min = 0; jointZero.max = 0;
+
+                        HingeJoint2D smoke = GameObject.Instantiate(ModAPI.FindSpawnable("Particle Projector").Prefab, Instance.transform.position + new Vector3(4f*direction, 2f, 0f), Quaternion.identity).AddComponent<HingeJoint2D>();
+                        smoke.connectedBody=Instance.GetComponent<Rigidbody2D>();
+                        smoke.limits=jointZero;
+                        smoke.GetComponent<SpriteRenderer>().sprite=null;
                         smoke.transform.parent = Instance.transform;
 
                         truck.objects[3]=back.gameObject;
